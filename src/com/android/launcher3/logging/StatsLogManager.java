@@ -30,7 +30,7 @@ import com.android.launcher3.logger.LauncherAtom.ContainerInfo;
 import com.android.launcher3.logger.LauncherAtom.FromState;
 import com.android.launcher3.logger.LauncherAtom.ToState;
 import com.android.launcher3.model.data.ItemInfo;
-import com.android.launcher3.userevent.LauncherLogProto;
+import com.android.launcher3.userevent.nano.LauncherLogProto;
 import com.android.launcher3.util.ResourceBasedOverride;
 
 /**
@@ -53,7 +53,7 @@ public class StatsLogManager implements ResourceBasedOverride {
      * (to be removed during UserEventDispatcher cleanup)
      */
     public static int containerTypeToAtomState(int containerType) {
-        switch (containerType) {
+        /*switch (containerType) {
             case LauncherLogProto.ContainerType.ALLAPPS_VALUE:
                 return LAUNCHER_STATE_ALLAPPS;
             case LauncherLogProto.ContainerType.OVERVIEW_VALUE:
@@ -62,7 +62,7 @@ public class StatsLogManager implements ResourceBasedOverride {
                 return LAUNCHER_STATE_HOME;
             case LauncherLogProto.ContainerType.APP_VALUE:
                 return LAUNCHER_STATE_BACKGROUND;
-        }
+        }*/
         return LAUNCHER_STATE_UNSPECIFIED;
     }
 
@@ -73,7 +73,7 @@ public class StatsLogManager implements ResourceBasedOverride {
      */
     public static EventEnum getLauncherAtomEvent(int startContainerType,
             int targetContainerType, EventEnum fallbackEvent) {
-        if (startContainerType == LauncherLogProto.ContainerType.WORKSPACE.getNumber()
+        /*if (startContainerType == LauncherLogProto.ContainerType.WORKSPACE.getNumber()
                 && targetContainerType == LauncherLogProto.ContainerType.WORKSPACE.getNumber()) {
             return LAUNCHER_HOME_GESTURE;
         } else if (startContainerType != LauncherLogProto.ContainerType.TASKSWITCHER.getNumber()
@@ -85,7 +85,7 @@ public class StatsLogManager implements ResourceBasedOverride {
         } else if (startContainerType == LauncherLogProto.ContainerType.ALLAPPS.getNumber()
                 && targetContainerType != LauncherLogProto.ContainerType.ALLAPPS.getNumber()) {
             return LAUNCHER_ALLAPPS_CLOSE_DOWN;
-        }
+        }*/
         return fallbackEvent; // TODO fix
     }
 

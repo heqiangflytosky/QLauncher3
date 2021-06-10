@@ -50,7 +50,7 @@ import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.logging.StatsLogUtils.LogContainerProvider;
 import com.android.launcher3.model.data.ItemInfo;
-import com.android.launcher3.userevent.LauncherLogProto;
+import com.android.launcher3.userevent.nano.LauncherLogProto;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import com.android.launcher3.userevent.nano.LauncherLogProto.LauncherEvent;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Target;
@@ -59,7 +59,6 @@ import com.android.launcher3.util.InstantAppResolver;
 import com.android.launcher3.util.LogConfig;
 import com.android.launcher3.util.ResourceBasedOverride;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.nano.InvalidProtocolBufferNanoException;
 import com.google.protobuf.nano.MessageNano;
 
@@ -363,13 +362,13 @@ public class UserEventDispatcher implements ResourceBasedOverride {
      * Logs proto lite version of LauncherEvent object to clearcut.
      */
     public void logLauncherEvent(
-            com.android.launcher3.userevent.LauncherLogProto.LauncherEvent launcherEvent) {
+            com.android.launcher3.userevent.nano.LauncherLogProto.LauncherEvent launcherEvent) {
 
         if (mPreviousHomeGesture) {
             mPreviousHomeGesture = false;
         }
         mAppOrTaskLaunch = false;
-        launcherEvent.toBuilder()
+        /*launcherEvent.toBuilder()
                 .setElapsedContainerMillis(SystemClock.uptimeMillis() - mElapsedContainerMillis)
                 .setElapsedSessionMillis(
                         SystemClock.uptimeMillis() - mElapsedSessionMillis).build();
@@ -377,7 +376,7 @@ public class UserEventDispatcher implements ResourceBasedOverride {
             dispatchUserEvent(LauncherEvent.parseFrom(launcherEvent.toByteArray()), null);
         } catch (InvalidProtocolBufferNanoException e) {
             throw new RuntimeException("Cannot convert LauncherEvent from Lite to Nano version.");
-        }
+        }*/
     }
 
     public void logDeepShortcutsOpen(View icon) {
@@ -475,7 +474,7 @@ public class UserEventDispatcher implements ResourceBasedOverride {
         try {
             liteLauncherEvent =
                     LauncherLogProto.LauncherEvent.parseFrom(MessageNano.toByteArray(ev));
-        } catch (InvalidProtocolBufferException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Cannot parse LauncherEvent from Nano to Lite version");
         }
         Log.d(TAG, liteLauncherEvent.toString());

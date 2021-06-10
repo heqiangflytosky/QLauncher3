@@ -196,12 +196,12 @@ public class LauncherAppWidgetInfo extends ItemInfo {
         return (options & option) != 0;
     }
 
-    @Override
-    public void setItemBuilder(LauncherAtom.ItemInfo.Builder builder) {
-        builder.setWidget(LauncherAtom.Widget.newBuilder()
-                .setSpanX(spanX)
-                .setSpanY(spanY)
-                .setComponentName(providerName.toString())
-                .setPackageName(providerName.getPackageName()));
-    }
+//    @Override
+//    public void setItemBuilder(LauncherAtom.ItemInfo.Builder builder) {
+//        builder.setWidget(LauncherAtom.Widget.newBuilder()
+//                .setSpanX(spanX)
+//                .setSpanY(spanY)
+//                .setComponentName(providerName.toString())
+//                .setPackageName(providerName.getPackageName()));
+//    }
 }

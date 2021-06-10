@@ -460,7 +460,7 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
             return;
         }
         CharSequence newTitle = nameInfos.getLabels()[0];
-        FromState fromState = mInfo.getFromLabelState();
+      //  FromState fromState = mInfo.getFromLabelState();
 
         mInfo.setTitle(newTitle, mFolder.mLauncher.getModelWriter());
         onTitleChanged(mInfo.title);
@@ -470,13 +470,13 @@ public class FolderIcon extends FrameLayout implements FolderListener, IconLabel
         StatsLogManager.newInstance(getContext()).logger()
                 .withInstanceId(instanceId)
                 .withItemInfo(mInfo)
-                .withFromState(fromState)
-                .withToState(ToState.TO_SUGGESTION0)
+        //        .withFromState(fromState)
+          //      .withToState(ToState.TO_SUGGESTION0)
                 // When LAUNCHER_FOLDER_LABEL_UPDATED event.edit_text does not have delimiter,
                 // event is assumed to be folder creation on the server side.
                 .withEditText(newTitle.toString())
                 .log(LAUNCHER_FOLDER_AUTO_LABELED);
-        mFolder.logFolderLabelState(fromState, ToState.TO_SUGGESTION0);
+       // mFolder.logFolderLabelState(fromState, ToState.TO_SUGGESTION0);
     }
 
 

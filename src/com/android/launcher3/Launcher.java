@@ -925,32 +925,32 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
 
     private void logStopAndResume(int command) {
-        int pageIndex = mWorkspace.isOverlayShown() ? -1 : mWorkspace.getCurrentPage();
-        int containerType = mStateManager.getState().containerType;
-
-        StatsLogManager.EventEnum event;
-        StatsLogManager.StatsLogger logger = getStatsLogManager().logger();
-        if (command == Action.Command.RESUME) {
-            logger.withSrcState(LAUNCHER_STATE_BACKGROUND)
-                .withDstState(containerTypeToAtomState(mStateManager.getState().containerType));
-            event = LAUNCHER_ONRESUME;
-        } else { /* command == Action.Command.STOP */
-            logger.withSrcState(containerTypeToAtomState(mStateManager.getState().containerType))
-                    .withDstState(LAUNCHER_STATE_BACKGROUND);
-            event = LAUNCHER_ONSTOP;
-        }
-
-        if (containerType == ContainerType.WORKSPACE && mWorkspace != null) {
-            getUserEventDispatcher().logActionCommand(command,
-                    containerType, -1, pageIndex);
-            logger.withContainerInfo(LauncherAtom.ContainerInfo.newBuilder()
-                    .setWorkspace(
-                            LauncherAtom.WorkspaceContainer.newBuilder()
-                                    .setPageIndex(pageIndex)).build());
-        } else {
-            getUserEventDispatcher().logActionCommand(command, containerType, -1);
-        }
-        logger.log(event);
+//        int pageIndex = mWorkspace.isOverlayShown() ? -1 : mWorkspace.getCurrentPage();
+//        int containerType = mStateManager.getState().containerType;
+//
+//        StatsLogManager.EventEnum event;
+//        StatsLogManager.StatsLogger logger = getStatsLogManager().logger();
+//        if (command == Action.Command.RESUME) {
+//            logger.withSrcState(LAUNCHER_STATE_BACKGROUND)
+//                .withDstState(containerTypeToAtomState(mStateManager.getState().containerType));
+//            event = LAUNCHER_ONRESUME;
+//        } else { /* command == Action.Command.STOP */
+//            logger.withSrcState(containerTypeToAtomState(mStateManager.getState().containerType))
+//                    .withDstState(LAUNCHER_STATE_BACKGROUND);
+//            event = LAUNCHER_ONSTOP;
+//        }
+//
+//        if (containerType == ContainerType.WORKSPACE && mWorkspace != null) {
+//            getUserEventDispatcher().logActionCommand(command,
+//                    containerType, -1, pageIndex);
+//            logger.withContainerInfo(LauncherAtom.ContainerInfo.newBuilder()
+//                    .setWorkspace(
+//                            LauncherAtom.WorkspaceContainer.newBuilder()
+//                                    .setPageIndex(pageIndex)).build());
+//        } else {
+//            getUserEventDispatcher().logActionCommand(command, containerType, -1);
+//        }
+//        logger.log(event);
     }
 
     private void scheduleDeferredCheck() {
