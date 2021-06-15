@@ -2675,7 +2675,14 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     }
 
     public TouchController[] createTouchControllers() {
-        return new TouchController[] {getDragController(), new AllAppsSwipeController(this)};
+        //QLauncher add 去掉抽屉@{
+        //return new TouchController[]{getDragController(), new AllAppsSwipeController(this)};
+        if (!FeatureFlags.REMOVE_DRAWER) {
+            return new TouchController[]{getDragController(), new AllAppsSwipeController(this)};
+        } else {
+            return new TouchController[]{getDragController()};
+        }
+        //@}
     }
 
     public void useFadeOutAnimationForLauncherStart(CancellationSignal signal) { }

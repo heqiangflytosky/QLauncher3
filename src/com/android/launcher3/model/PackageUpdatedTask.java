@@ -22,12 +22,17 @@ import static com.android.launcher3.model.data.WorkspaceItemInfo.FLAG_RESTORED_I
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
+import android.util.Pair;
+
+import androidx.core.os.UserManagerCompat;
 
 import com.android.launcher3.InstallShortcutReceiver;
 import com.android.launcher3.LauncherAppState;
@@ -39,6 +44,7 @@ import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.icons.IconCache;
 import com.android.launcher3.icons.LauncherIcons;
 import com.android.launcher3.logging.FileLog;
+import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
@@ -167,6 +173,10 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
                 break;
             }
         }
+
+        // QLauncher add 去掉抽屉,添加或者更新应以时更新到WorkSpace@{
+        updateToWorkSpace(context,app,dataModel,appsList,matcher);
+        //@}
 
         bindApplicationsIfNeeded();
 
@@ -351,4 +361,87 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
         }
         return false;
     }
+
+    // QLauncher add 去掉抽屉,添加或者更新应以时更新到WorkSpace@{
+    public void updateToWorkSpace(Context context, LauncherAppState app ,BgDataModel dataModel, AllAppsList appsList,ItemInfoMatcher matcher){
+        if (FeatureFlags.REMOVE_DRAWER) {
+            boolean intentChangedUpdate = false;
+            if (mOp == OP_UPDATE) {
+                WorkspaceItemInfo si1 = null;
+                String packageName1 = null;
+                synchronized (dataModel) {
+                    for (ItemInfo info : dataModel.itemsIdMap) {
+                        if (info instanceof WorkspaceItemInfo && mUser.equals(info.user)) {
+                            si1 = (WorkspaceItemInfo) info;
+                            ComponentName cn = si1.getTargetComponent();
+                            if (cn != null && matcher.matches(si1, cn)) {
+                                packageName1 = cn.getPackageName();
+
+                                if (null != packageName1) {
+                                    Intent newIntent = new PackageManagerHelper(context).getAppLaunchIntent(packageName1, mUser, cn);
+                                    String newClassName = null;
+                                    if (null != newIntent && null != newIntent.getComponent()) {
+                                        newClassName = newIntent.getComponent().getClassName();
+                                    }
+                                    String oldClassName = cn.getClassName();
+
+                                    Log.d(TAG, "update old intent toString=" + (null != si1.intent ? si1.intent.toString() : null));
+                                    Log.d(TAG, "update new intent toString=" + (null != newIntent ? newIntent.toString() : null));
+                                    Log.d(TAG, "update oldClassName=" + oldClassName);
+                                    Log.d(TAG, "update newClassName=" + newClassName);
+
+                                    // 只有intent class变化时更新
+                                    if (null != newClassName && !newClassName.equals(oldClassName)) {
+                                        Log.d(TAG, "update when intent changed.");
+
+                                        ArrayList<WorkspaceItemInfo> updatedWorkspaceItems = new ArrayList<>();
+                                        updateWorkspaceItemIntent(context, si1, packageName1);
+                                        updatedWorkspaceItems.add(si1);
+                                        getModelWriter().updateItemInDatabase(si1);
+                                        bindUpdatedWorkspaceItems(updatedWorkspaceItems);
+                                        intentChangedUpdate = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Log.d(TAG, "appsList.added=" + appsList.data.size());
+            Log.d(TAG, "classe changed update=" + intentChangedUpdate);
+            if (!intentChangedUpdate) {
+                updateToWorkSpace(context, app, appsList);
+            }
+        }
+    }
+
+    private void updateToWorkSpace(Context context, LauncherAppState app, AllAppsList appsList) {
+        if (FeatureFlags.REMOVE_DRAWER) {
+            ArrayList<Pair<ItemInfo, Object>> installQueue = new ArrayList<>();
+            UserManager userManager = context.getSystemService(UserManager.class);
+            final List<UserHandle> profiles = userManager.getUserProfiles();
+            for (UserHandle user : profiles) {
+                final List<LauncherActivityInfo> apps = context.getSystemService(LauncherApps.class)
+                        .getActivityList(null, user);
+                synchronized (this) {
+                    for (LauncherActivityInfo info : apps) {
+                        for (AppInfo appInfo : appsList.data) {
+                            if (info.getComponentName().equals(appInfo.componentName) && null != info.getUser() && info.getUser().equals(appInfo.user)) {
+                                InstallShortcutReceiver.PendingInstallShortcutInfo pendingInstallShortcutInfo = new InstallShortcutReceiver.PendingInstallShortcutInfo(info, context);
+                                installQueue.add(pendingInstallShortcutInfo.getItemInfo());
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!installQueue.isEmpty()) {
+                for (Pair<ItemInfo, Object> item : installQueue) {
+                    Log.d(TAG, "installQueue, user=" + item.first.user.toString() + ",title=" + item.first.title);
+                }
+                app.getModel().addAndBindAddedWorkspaceItems(installQueue);
+            }
+        }
+    }
+    //@}
 }

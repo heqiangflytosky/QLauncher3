@@ -345,4 +345,23 @@ public class PackageManagerHelper {
         }
         return false;
     }
+
+    // QLauncher add 去掉抽屉@{
+    public Intent getAppLaunchIntent(String pkg, UserHandle user, ComponentName cn) {
+        List<LauncherActivityInfo> activities = mLauncherApps.getActivityList(pkg, user);
+        Intent result = null;
+        if (!activities.isEmpty()) {
+            for (LauncherActivityInfo info : activities) {
+                if (null != info.getComponentName() && info.getComponentName().equals(cn)) {
+                    result = AppInfo.makeLaunchIntent(info);
+                    break;
+                }
+            }
+            if (null == result) {
+                result = AppInfo.makeLaunchIntent(activities.get(0));
+            }
+        }
+        return result;
+    }
+    //@}
 }

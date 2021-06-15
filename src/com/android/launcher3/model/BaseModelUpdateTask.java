@@ -21,6 +21,7 @@ import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherModel.CallbackTask;
 import com.android.launcher3.LauncherModel.ModelUpdateTask;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.model.BgDataModel.Callbacks;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
@@ -62,7 +63,12 @@ public abstract class BaseModelUpdateTask implements ModelUpdateTask {
                 Log.d(TAG, "Ignoring model task since loader is pending=" + this);
             }
             // Loader has not yet run.
-            return;
+            // QLauncher add 去掉抽屉@{
+            //return;
+            if (!FeatureFlags.REMOVE_DRAWER){
+                return;
+            }
+            //@}
         }
         execute(mApp, mDataModel, mAllAppsList);
     }

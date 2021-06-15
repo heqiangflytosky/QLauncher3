@@ -275,4 +275,8 @@ public final class FeatureFlags {
                 ? new DebugFlag(key, defaultValue, description)
                 : new BooleanFlag(key, defaultValue);
     }
+
+    // QLauncher add 去掉抽屉@{
+    public static final boolean REMOVE_DRAWER = true;
+    // @}
 }

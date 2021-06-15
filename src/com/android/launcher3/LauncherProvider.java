@@ -35,6 +35,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -47,6 +49,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -54,6 +57,7 @@ import android.provider.BaseColumns;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Xml;
 
 import com.android.launcher3.AutoInstallsLayout.LayoutParserCallback;
@@ -61,6 +65,7 @@ import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.DbDowngradeHelper;
+import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.pm.UserCache;
 import com.android.launcher3.provider.LauncherDbUtils;
 import com.android.launcher3.provider.LauncherDbUtils.SQLiteTransaction;
@@ -82,6 +87,7 @@ import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -542,9 +548,54 @@ public class LauncherProvider extends ContentProvider {
                 mOpenHelper.loadFavorites(mOpenHelper.getWritableDatabase(),
                         getDefaultLayoutParser(widgetHost));
             }
+            // QLauncher add 去掉抽屉@{
+            if (FeatureFlags.REMOVE_DRAWER) {
+                //或者这里定制一个parser
+                loadCustomFavourite();
+            }
+            // @}
             clearFlagEmptyDbCreated();
         }
     }
+
+    // QLauncher add 去掉抽屉@{
+    synchronized private void loadCustomFavourite(){
+        final Context context = getContext();
+        ArrayList<Pair<ItemInfo, Object>> installQueue = new ArrayList<>();
+        final List<UserHandle> profiles = context.getSystemService(UserManager.class).getUserProfiles();
+        LauncherApps launcherApps = context.getSystemService(LauncherApps.class);
+        for (UserHandle user : profiles) {
+            final List<LauncherActivityInfo> apps = launcherApps.getActivityList(null, user);
+            ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo> added = new ArrayList<InstallShortcutReceiver.PendingInstallShortcutInfo>();
+            synchronized (this) {
+                for (LauncherActivityInfo app : apps) {
+
+                    // 剔除掉默认的favourite
+                    boolean exists = false;
+                    for(ComponentName componentName : mOpenHelper.mCompoentList){
+                        if (componentName.getPackageName().equals(app.getComponentName().getPackageName())
+                        && componentName.getClassName().equals(app.getComponentName().getClassName())) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if(exists){
+                        continue;
+                    }
+
+                    InstallShortcutReceiver.PendingInstallShortcutInfo pendingInstallShortcutInfo = new InstallShortcutReceiver.PendingInstallShortcutInfo(app, context);
+                    added.add(pendingInstallShortcutInfo);
+                    installQueue.add(pendingInstallShortcutInfo.getItemInfo());
+                }
+            }
+            Log.e("Test",""+added.size());
+            if (!added.isEmpty()) {
+                LauncherAppState.getInstance(context).getModel()
+                        .addAndBindAddedWorkspaceItems(installQueue);
+            }
+        }
+    }
+    // @}
 
     /**
      * Creates workspace loader from an XML resource listed in the app restrictions.
@@ -1001,8 +1052,21 @@ public class LauncherProvider extends ContentProvider {
             return new LauncherAppWidgetHost(mContext);
         }
 
+        // QLauncher add @{
+        public ArrayList<ComponentName> mCompoentList = new ArrayList<>();
+        // @}
         @Override
         public int insertAndCheck(SQLiteDatabase db, ContentValues values) {
+            // QLauncher add @{
+            try {
+                String str = values.getAsString(Favorites.INTENT);
+                Intent intent = Intent.parseUri(str,0);
+                mCompoentList.add(intent.getComponent());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            // @}
+
             return dbInsertAndCheck(this, db, Favorites.TABLE_NAME, null, values);
         }
 

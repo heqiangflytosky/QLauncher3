@@ -78,9 +78,11 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                     }
 
                     // b/139663018 Short-circuit this logic if the icon is a system app
-                    if (PackageManagerHelper.isSystemApp(app.getContext(), item.getIntent())) {
-                        continue;
-                    }
+                    // QLauncher modified 去掉抽屉,允许系统应用添加图标@{
+//                    if (PackageManagerHelper.isSystemApp(app.getContext(), item.getIntent())) {
+//                        continue;
+//                    }
+                    // @}
                 }
 
                 if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
