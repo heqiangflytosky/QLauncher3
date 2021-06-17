@@ -1058,12 +1058,14 @@ public class LauncherProvider extends ContentProvider {
         @Override
         public int insertAndCheck(SQLiteDatabase db, ContentValues values) {
             // QLauncher add @{
-            try {
-                String str = values.getAsString(Favorites.INTENT);
-                Intent intent = Intent.parseUri(str,0);
-                mCompoentList.add(intent.getComponent());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (FeatureFlags.REMOVE_DRAWER) {
+                try {
+                    String str = values.getAsString(Favorites.INTENT);
+                    Intent intent = Intent.parseUri(str, 0);
+                    mCompoentList.add(intent.getComponent());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             // @}
 

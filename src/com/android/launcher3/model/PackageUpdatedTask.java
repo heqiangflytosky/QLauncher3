@@ -175,7 +175,9 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
         }
 
         // QLauncher add 去掉抽屉,添加或者更新应以时更新到WorkSpace@{
-        updateToWorkSpace(context,app,dataModel,appsList,matcher);
+        if (FeatureFlags.REMOVE_DRAWER) {
+            updateToWorkSpace(context, app, dataModel, appsList, matcher);
+        }
         //@}
 
         bindApplicationsIfNeeded();

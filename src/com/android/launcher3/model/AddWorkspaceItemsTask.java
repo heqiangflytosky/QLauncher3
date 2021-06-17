@@ -27,6 +27,7 @@ import com.android.launcher3.InvariantDeviceProfile;
 import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherModel.CallbackTask;
 import com.android.launcher3.LauncherSettings;
+import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.model.BgDataModel.Callbacks;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.FolderInfo;
@@ -79,9 +80,14 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
 
                     // b/139663018 Short-circuit this logic if the icon is a system app
                     // QLauncher modified 去掉抽屉,允许系统应用添加图标@{
-//                    if (PackageManagerHelper.isSystemApp(app.getContext(), item.getIntent())) {
-//                        continue;
-//                    }
+                    /*
+                    if (PackageManagerHelper.isSystemApp(app.getContext(), item.getIntent())) {
+                        continue;
+                    }
+                    */
+                    if (!FeatureFlags.REMOVE_DRAWER && PackageManagerHelper.isSystemApp(app.getContext(), item.getIntent())) {
+                        continue;
+                    }
                     // @}
                 }
 
